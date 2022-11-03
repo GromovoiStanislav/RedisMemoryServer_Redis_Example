@@ -94,6 +94,17 @@ console.log('append', await client.get('hello.world')); //Hello World
 console.log('exists', await client.exists('hello.world')); //1
 console.log('exists', await client.exists('hello')); //0
 
+console.log('=================List/Array========================');
+// List/Array
+await client.rPush('mylist', 'one'); //создает массив если нет. rPushX - только если ключ свободен
+await client.rPush('mylist', ['two', 'three']);
+await client.lPush('mylist', 'zero');
+console.log('lLen', await client.lLen('mylist')); //4
+console.log('lRange', await client.lRange('mylist', 0, -1)); //[ 'zero', 'one', 'two', 'three' ]
+console.log('lIndex', await client.lIndex('mylist', -1)); //three'
+await client.lTrim('mylist', 1, -1);
+console.log('lRange', await client.lRange('mylist', 0, -1)); //[ 'one', 'two', 'three' ]
+
 console.log('==============================================');
 
 // raw Redis commands
@@ -169,8 +180,8 @@ console.log('===================scanIterator===========================');
 
 // scanIterator
 for await (const key of client.scanIterator()) {
-  if (key !== 'myhash') {
-    console.log('scanIterator', key, await client.get('' + key));
+  if (key !== 'myhash' && key !== 'mylist') {
+    console.log('scanIterator', key, await client.get(key));
   }
 }
 
