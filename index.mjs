@@ -120,6 +120,22 @@ await client.lPushX('mylist2', 'zero'); //НЕ создает новый мас�
 await client.rPushX('mylist2', 'zero'); //НЕ создает новый массив, а только добавляет 1 эл (не массив)
 console.log('lPushX & rPushX', await client.lRange('mylist2', 0, -1)); //[]
 
+await client.lPush('mylist', ['1', '2', '3', '4', '5']);
+console.log('lPush', await client.lRange('mylist', 0, -1)); //[ '5', '4', '3', '2', '1', 'two', 'three' ]
+console.log('lPop', await client.lPop('mylist')); //5
+console.log('rPop', await client.rPop('mylist')); //three
+console.log('lPop & rPop', await client.lRange('mylist', 0, -1)); //[ '4', '3', '2', '1', 'two' ]
+
+await client.lInsert('mylist', 'BEFORE', 'two', 'one');
+await client.lInsert('mylist', 'AFTER', '1', '0');
+console.log('lInsert', await client.lRange('mylist', 0, -1)); //[ '4', '3', '2', '1', '0','one', 'two' ]
+
+//console.log('lPos', await client.lPos('mylist', 'one'));
+//await client.lMove('mylist', 'mylist2', 'RIGHT', 'LEFT');
+console.log('rPopLPush', await client.rPopLPush('mylist', 'mylist2'));
+console.log('mylist', await client.lRange('mylist', 0, -1)); //[ '4', '3', '2', '1', '0', 'one' ]
+console.log('mylist2', await client.lRange('mylist2', 0, -1)); //[ 'two' ]
+
 console.log('==============================================');
 
 // raw Redis commands
@@ -195,7 +211,7 @@ console.log('===================scanIterator===========================');
 
 // scanIterator
 for await (const key of client.scanIterator()) {
-  if (key !== 'myhash' && key !== 'mylist') {
+  if (key !== 'myhash' && key !== 'mylist' && key !== 'mylist2') {
     console.log('scanIterator', key, await client.get(key));
   }
 }
@@ -213,13 +229,16 @@ for await (const key of client.scanIterator({
 }
 
 //Exit
+client.flushAll(); //Очистка ВСЕХ данных
+//client.flushDb(); //Очистка ВСЕХ данных
+
 setTimeout(async () => {
   if (client) {
     await client.quit(); //дожидается выполнения начавшихся команд
     //await client.disconnect();//close a client's connection immediately
   }
   if (client2) {
-    await client.quit();
+    await client2.quit();
   }
   if (redisServer) {
     await redisServer.stop();
