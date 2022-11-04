@@ -130,8 +130,6 @@ await client.lInsert('mylist', 'BEFORE', 'two', 'one');
 await client.lInsert('mylist', 'AFTER', '1', '0');
 console.log('lInsert', await client.lRange('mylist', 0, -1)); //[ '4', '3', '2', '1', '0','one', 'two' ]
 
-//console.log('lPos', await client.lPos('mylist', 'one'));
-//await client.lMove('mylist', 'mylist2', 'RIGHT', 'LEFT');
 console.log('rPopLPush', await client.rPopLPush('mylist', 'mylist2'));
 console.log('mylist', await client.lRange('mylist', 0, -1)); //[ '4', '3', '2', '1', '0', 'one' ]
 console.log('mylist2', await client.lRange('mylist2', 0, -1)); //[ 'two' ]
