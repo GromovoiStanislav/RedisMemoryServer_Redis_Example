@@ -6,7 +6,7 @@ const host = await redisServer.getHost();
 const port = await redisServer.getPort();
 
 const client = createClient({
-  url: `redis://${host}:${port}`,
+  url: `redis://${host}:${port}/1`,
 });
 
 client.on('error', (err) => console.log('Redis Client Error', err));
@@ -96,14 +96,22 @@ console.log('exists', await client.exists('hello')); //0
 
 console.log('=================List/Array========================');
 // List/Array
-await client.rPush('mylist', 'one'); //создает массив если нет. rPushX - только если ключ свободен
+await client.rPush('mylist', 'one'); //создает новый массив если его ещё нет
 await client.rPush('mylist', ['two', 'three']);
-await client.lPush('mylist', 'zero');
+await client.lPush('mylist', 'zero'); //создает новый массив если если его ещё нет
 console.log('lLen', await client.lLen('mylist')); //4
 console.log('lRange', await client.lRange('mylist', 0, -1)); //[ 'zero', 'one', 'two', 'three' ]
 console.log('lIndex', await client.lIndex('mylist', -1)); //three'
 await client.lTrim('mylist', 1, -1);
-console.log('lRange', await client.lRange('mylist', 0, -1)); //[ 'one', 'two', 'three' ]
+console.log('lTrim', await client.lRange('mylist', 0, -1)); //[ 'one', 'two', 'three' ]
+await client.lSet('mylist', 0, 'Hello');
+console.log('lSet', await client.lRange('mylist', 0, -1)); //[ 'Hello', 'two', 'three' ]
+await client.lRem('mylist', 0, 'Hello'); //count=0 все, count>0 с лева на право, count<0 с права на лево
+console.log('lRem', await client.lRange('mylist', 0, -1)); //[ 'two', 'three' ]
+
+await client.lPushX('mylist2', 'zero'); //НЕ создает новый массивб, а только добавляет 1 эл (не массив)
+await client.rPushX('mylist2', 'zero'); //НЕ создает новый массив, а только добавляет 1 эл (не массив)
+console.log('lPushX & rPushX', await client.lRange('mylist2', 0, -1)); //[]
 
 console.log('==============================================');
 
