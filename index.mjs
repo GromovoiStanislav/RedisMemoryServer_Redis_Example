@@ -226,7 +226,15 @@ for await (const key of client.scanIterator({
   console.log('scanIterator', key, await client.get('' + key));
 }
 
-//Exit
+console.log('===================Auto-Pipelining===========================');
+
+await Promise.all([
+  client.set('Tm9kZSBSZWRpcw==', 'users:1'),
+  client.sAdd('users:1:tokens', 'Tm9kZSBSZWRpcw=='),
+]);
+
+console.log('===================Exit===========================');
+
 client.flushAll(); //Очистка ВСЕХ данных
 //client.flushDb(); //Очистка ВСЕХ данных
 
