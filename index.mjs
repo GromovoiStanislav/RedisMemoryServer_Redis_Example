@@ -9,15 +9,22 @@ const client = createClient({
   url: `redis://${host}:${port}/1`,
 });
 
+const client2 = createClient({
+  url: `redis://${host}:${port}/2`,
+});
+
 client.on('error', (err) => console.log('Redis Client Error', err));
 
 await client.connect();
+await client2.connect();
 
 //Все команды Redis https://redis.io/commands/
 
 await client.set('key1', 'value1');
 let value = await client.get('key1');
 console.log('key1', value); //value1
+
+console.log('client2', await client2.get('key1')); //null
 
 await client.set('key1', 'value2', {
   EX: 10, //или setEx - удалить через 10 сек
@@ -210,6 +217,9 @@ setTimeout(async () => {
   if (client) {
     await client.quit(); //дожидается выполнения начавшихся команд
     //await client.disconnect();//close a client's connection immediately
+  }
+  if (client2) {
+    await client.quit();
   }
   if (redisServer) {
     await redisServer.stop();
