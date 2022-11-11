@@ -209,7 +209,7 @@ console.log('===================scanIterator===========================');
 
 // scanIterator
 for await (const key of client.scanIterator()) {
-  if (key !== 'myhash' && key !== 'mylist' && key !== 'mylist2') {
+  if (client.type(key) === 'string') {
     console.log('scanIterator', key, await client.get(key));
   }
 }
@@ -235,8 +235,8 @@ await Promise.all([
 
 console.log('===================Exit===========================');
 
-client.flushAll(); //Очистка ВСЕХ данных
-//client.flushDb(); //Очистка ВСЕХ данных
+await client.flushAll(); //Очистка ВСЕХ данных
+//await client.flushDb(); //Очистка ВСЕХ данных
 
 setTimeout(async () => {
   if (client) {
